@@ -10,6 +10,10 @@
 
 (defmulti read (fn [qterm & _] (first qterm)))
 
+(defmethod read :tab/todo
+  [query-term env _]
+  (parse-children query-term env))
+
 (defmethod read :qlkit-todo/todos
   [[_ params :as query-term] env _]
   (let [{:keys [todo-id]} params]

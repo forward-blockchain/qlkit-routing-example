@@ -38,6 +38,33 @@
            (when (seq todos)
              [:card [:ol (for [todo todos]
                            [TodoItem todo])]])]))
+(defcomponent Counter
+  (query [])
+  (render [atts state]
+          [:div {:max-width 300}
+           [:p "Counter"]]))
+
+(defcomponent Text
+  (query [])
+  (render [atts state]
+          [:div {:max-width 300}
+           [:p "Text"]]))
+
+(defcomponent Root
+  (query [[:tab/current]
+          [:tab/todo    (ql/get-query TodoList)]
+          [:tab/counter (ql/get-query Counter)]
+          [:tab/text    (ql/get-query Text)]])
+  (render [{:keys [:tab/current
+                   :tab/todo
+                   :tab/counter
+                   :tab/text] :as atts}
+           state]
+          [:div {:max-width 300}
+           ({:todo-list [TodoList todo]
+             :counter   [Counter  counter]
+             :text      [Text     text]}
+            current)]))
 
 (defn remote-handler [query callback]
   (go (let [{:keys [status body] :as result} (<! (post "endpoint" {:edn-params query}))]
@@ -45,7 +72,7 @@
           (print "server error: " body)
           (callback (read-string body))))))
 
-(ql/mount {:component      TodoList
+(ql/mount {:component      Root
            :dom-element    (getElement "app")
            :state          app-state
            :remote-handler remote-handler

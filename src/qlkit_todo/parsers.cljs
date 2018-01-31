@@ -1,7 +1,28 @@
 (ns qlkit-todo.parsers
   (:require [qlkit.core :refer [parse-children parse-children-remote parse-children-sync]]))
 
+(defn log [& args]
+  (apply
+   js/console.log
+   args))
+
 (defmulti read (fn [qterm & _] (first qterm)))
+
+(defmethod read :tab/todo
+  [[dispatch-key params & children :as query-term] env state]
+  (parse-children query-term env))
+
+(defmethod read :tab/counter
+  [query-term env state]
+  (parse-children query-term env))
+
+(defmethod read :tab/text
+  [query-term env state]
+  (parse-children query-term env))
+
+(defmethod read :tab/current
+  [_ _ {:keys [:tab/current] :as state}]
+  (or current :tab/todo))
 
 (defmethod read :qlkit-todo/todos
   [[dispatch-key params :as query-term] env {:keys [:todo/by-id] :as state}]
@@ -31,7 +52,15 @@
   [query-term {:keys [todo-id] :as env} state-atom]
   (swap! state-atom update :todo/by-id dissoc todo-id))
 
+(defmethod mutate :tab/current!
+  [query-term {:keys [:tab/current] :as env} state-atom]
+  (swap! state-atom assoc :tab/current current))
+
 (defmulti remote (fn [qterm & _] (first qterm)))
+
+(defmethod remote :tab/todo
+  [query-term state]
+  query-term)
 
 (defmethod remote :todo/new!
   [query-term state]
@@ -59,6 +88,10 @@
   [[_ params :as query-term] result env state-atom]
   (for [{:keys [db/id] :as todo} result]
     (parse-children-sync query-term todo (assoc env :db/id id))))
+
+(defmethod sync :tab/todo
+  [[_ params :as query-term] result env state-atom]
+  (parse-children-sync query-term result env))
 
 (defmethod sync :todo/text
   [query-term result {:keys [:db/id] :as env} state-atom]
