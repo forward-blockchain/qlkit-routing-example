@@ -60,11 +60,17 @@
                    :tab/counter
                    :tab/text] :as atts}
            state]
-          [:div {:max-width 300}
-           ({:todo-list [TodoList todo]
-             :counter   [Counter  counter]
-             :text      [Text     text]}
-            current)]))
+          [:div
+           [:span
+            [:button {:on-click (fn [] (transact! [:tab/current! {:tab/current :tab/todo}]))}    "TodoList"]
+            [:button {:on-click (fn [] (transact! [:tab/current! {:tab/current :tab/counter}]))} "Counter"]
+            [:button {:on-click (fn [] (transact! [:tab/current! {:tab/current :tab/text}]))}    "Text"]]
+           (condp = current
+             :tab/todo    [TodoList todo]
+             :tab/counter [Counter counter]
+             :tab/text    [Text text])]))
+
+
 
 (defn remote-handler [query callback]
   (go (let [{:keys [status body] :as result} (<! (post "endpoint" {:edn-params query}))]

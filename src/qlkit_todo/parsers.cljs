@@ -9,7 +9,7 @@
 (defmulti read (fn [qterm & _] (first qterm)))
 
 (defmethod read :tab/todo
-  [[dispatch-key params & children :as query-term] env state]
+  [query-term env state]
   (parse-children query-term env))
 
 (defmethod read :tab/counter
@@ -53,8 +53,8 @@
   (swap! state-atom update :todo/by-id dissoc todo-id))
 
 (defmethod mutate :tab/current!
-  [query-term {:keys [:tab/current] :as env} state-atom]
-  (swap! state-atom assoc :tab/current current))
+  [[_ params :as query-term] env state-atom]
+  (swap! state-atom assoc :tab/current (:tab/current params)))
 
 (defmulti remote (fn [qterm & _] (first qterm)))
 
