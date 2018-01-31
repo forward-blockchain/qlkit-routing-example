@@ -60,17 +60,16 @@
                    :tab/counter
                    :tab/text] :as atts}
            state]
-          [:div
-           [:span
-            [:button {:on-click (fn [] (transact! [:tab/current! {:tab/current :tab/todo}]))}    "TodoList"]
-            [:button {:on-click (fn [] (transact! [:tab/current! {:tab/current :tab/counter}]))} "Counter"]
-            [:button {:on-click (fn [] (transact! [:tab/current! {:tab/current :tab/text}]))}    "Text"]]
-           (condp = current
-             :tab/todo    [TodoList todo]
-             :tab/counter [Counter counter]
-             :tab/text    [Text text])]))
-
-
+          (let [tab! (fn [tab] (fn [] (transact! [:tab/current! {:tab/current tab}])))]
+            [:div
+             [:tabs
+              [:tab {:label "Todo"    :on-active (tab! :tab/todo)}]
+              [:tab {:label "Counter" :on-active (tab! :tab/counter)}]
+              [:tab {:label "Text"    :on-active (tab! :tab/text)}]]
+             (condp = current
+               :tab/todo    [TodoList todo]
+               :tab/counter [Counter counter]
+               :tab/text    [Text text])])))
 
 (defn remote-handler [query callback]
   (go (let [{:keys [status body] :as result} (<! (post "endpoint" {:edn-params query}))]
