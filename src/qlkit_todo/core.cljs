@@ -39,18 +39,20 @@
              [:card [:ol (for [todo todos]
                            [TodoItem todo])]])]))
 (defcomponent Counter
-  (query [])
+  (query [[:counter/counter]])
   (render [{:keys [:counter/counter] :as atts} state]
-          [:span
-           [:chip (str "Number: " 942 #_ counter)]
-           [:icon-button {:on-click identity} [:navigation-arrow-drop-up]]
-           [:icon-button {:on-click identity} [:navigation-arrow-drop-down]]]))
+          (let [inc! (fn [e] (transact! [:counter/inc!]))
+                dec! (fn [e] (transact! [:counter/dec!]))]
+            [:card
+             [:chip (str "Number: " counter)]
+             [:icon-button {:on-click inc!} [:navigation-arrow-drop-up]]
+             [:icon-button {:on-click dec!} [:navigation-arrow-drop-down]]])))
 
 (defcomponent Text
   (query [])
   (render [{:keys [:text/text] :as atts} {:keys [value] :as state}]
           (let [value   (or text value "")]
-            [:div
+            [:card
              [:text-field {:floating-label-text "Compose"
                            :hint-text           (apply str (repeat 50 "Passersby were amazed at the unusually large amounts of blood. "))
                            :value               value

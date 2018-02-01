@@ -8,9 +8,15 @@
                   1 {:db/id 1 :todo/text "pay the bills"}
                   2 {:db/id 2 :todo/text "iron the curtains"}}))
 
+(def counter (atom 0))
+
 (defmulti read (fn [qterm & _] (first qterm)))
 
 (defmethod read :tab/todo
+  [query-term env _]
+  (parse-children query-term env))
+
+(defmethod read :tab/counter
   [query-term env _]
   (parse-children query-term env))
 
@@ -31,6 +37,10 @@
   (when (@todos todo-id)
     todo-id))
 
+(defmethod read :counter/counter
+  [query-term env _]
+  @counter)
+
 (defmulti mutate (fn [qterm & _] (first qterm)))
 
 (defmethod mutate :todo/new!
@@ -47,3 +57,11 @@
 (defmethod mutate :todo/delete!
   [query-term {:keys [todo-id] :as env} _]
   (swap! todos dissoc todo-id))
+
+(defmethod mutate :counter/inc!
+  [query-term env _]
+  (swap! counter inc))
+
+(defmethod mutate :counter/dec!
+  [query-term env _]
+  (swap! counter dec))

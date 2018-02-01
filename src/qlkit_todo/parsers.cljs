@@ -8,11 +8,11 @@
 
 (defmulti read (fn [qterm & _] (first qterm)))
 
-(defmethod read :tab/todo
-  [query-term env state]
-  (parse-children query-term env))
+(defmethod read :tab/current
+  [_ _ {:keys [:tab/current] :as state}]
+  (or current :tab/todo))
 
-(defmethod read :tab/counter
+(defmethod read :tab/todo
   [query-term env state]
   (parse-children query-term env))
 
@@ -20,9 +20,9 @@
   [query-term env state]
   (parse-children query-term env))
 
-(defmethod read :tab/current
-  [_ _ {:keys [:tab/current] :as state}]
-  (or current :tab/todo))
+(defmethod read :tab/counter
+  [query-term env state]
+  (parse-children query-term env))
 
 (defmethod read :qlkit-todo/todos
   [[dispatch-key params :as query-term] env {:keys [:todo/by-id] :as state}]
@@ -40,6 +40,10 @@
 (defmethod read :todo/text
   [query-term {:keys [todo-id] :as env} state]
   (get-in state [:todo/by-id todo-id :todo/text]))
+
+(defmethod read :counter/counter
+  [query-term env {:keys [counter/counter] :as state}]
+  counter)
 
 (defmulti mutate (fn [qterm & _] (first qterm)))
 
@@ -62,6 +66,10 @@
   [query-term state]
   query-term)
 
+(defmethod remote :tab/counter
+  [query-term state]
+  query-term)
+
 (defmethod remote :todo/new!
   [query-term state]
   query-term)
@@ -75,6 +83,18 @@
   query-term)
 
 (defmethod remote :db/id
+  [query-term state]
+  query-term)
+
+(defmethod remote :counter/counter
+  [query-term state]
+  query-term)
+
+(defmethod remote :counter/inc!
+  [query-term state]
+  query-term)
+
+(defmethod remote :counter/dec!
   [query-term state]
   query-term)
 
@@ -93,6 +113,10 @@
   [[_ params :as query-term] result env state-atom]
   (parse-children-sync query-term result env))
 
+(defmethod sync :tab/counter
+  [query-term result env state-atom]
+  (parse-children-sync query-term result env))
+
 (defmethod sync :todo/text
   [query-term result {:keys [:db/id] :as env} state-atom]
   (when id
@@ -102,6 +126,10 @@
   [query-term result {:keys [:db/id] :as env} state-atom]
   (when id
     (swap! state-atom assoc-in [:todo/by-id id :db/id] result)))
+
+(defmethod sync :counter/counter
+  [query-term result env state-atom]
+  (swap! state-atom assoc :counter/counter result))
 
 (defmethod sync :todo/new!
   [query-term result env state-atom]
