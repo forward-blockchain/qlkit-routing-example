@@ -10,7 +10,7 @@
 
 (defmethod read :tab/current
   [_ _ {:keys [:tab/current] :as state}]
-  (or current :tab/todo))
+  current)
 
 (defmethod read :tab/todo
   [query-term env state]

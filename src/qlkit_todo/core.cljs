@@ -77,6 +77,7 @@
           [:tab/todo    (ql/get-query TodoList)]
           [:tab/counter (ql/get-query Counter)]
           [:tab/text    (ql/get-query Text)]])
+  (component-did-mount [] (transact! [:tab/current! {:tab/current :tab/todo}]))
   (render [{:keys [:tab/current
                    :tab/todo
                    :tab/counter
