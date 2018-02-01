@@ -83,16 +83,12 @@
                    :tab/counter
                    :tab/text] :as atts}
            state]
-          (let [tab!  (fn [tab] (fn [] (transact! [:tab/current! {:tab/current tab}])))
-                child (condp = current
-                        :tab/todo    (when todo [TodoList todo])
-                        :tab/counter (when counter [Counter counter])
-                        :tab/text    (when text [Text text]))]
+          (let [tab!  (fn [tab] (fn [] (transact! [:tab/current! {:tab/current tab}])))]
             [:div
              [:tabs
-              [:tab {:label "Todo"    :on-active (tab! :tab/todo)}    child]
-              [:tab {:label "Counter" :on-active (tab! :tab/counter)} child]
-              [:tab {:label "Text"    :on-active (tab! :tab/text)}    child]]])))
+              [:tab {:label "Todo"    :on-active (tab! :tab/todo)}    (when todo    [TodoList todo])]
+              [:tab {:label "Counter" :on-active (tab! :tab/counter)} (when counter [Counter counter])]
+              [:tab {:label "Text"    :on-active (tab! :tab/text)}    (when text    [Text text])]]])))
 
 (defn remote-handler [query callback]
   (go (let [{:keys [status body] :as result} (<! (post "endpoint" {:edn-params query}))]
