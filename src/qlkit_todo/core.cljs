@@ -49,18 +49,28 @@
              [:icon-button {:on-click dec!} [:navigation-arrow-drop-down]]])))
 
 (defcomponent Text
-  (query [])
+  (query [[:text/text]])
   (render [{:keys [:text/text] :as atts} {:keys [value] :as state}]
-          (let [value   (or text value "")]
+          (let [display    (cond (not (empty? value)) value
+                                 (not (empty? text))  text
+                                 :else                "")
+                save!      (fn [e]
+                             (transact! [:text/save! {:text/text value}])
+                             (update-state! dissoc :value))
+                delete!    (fn [e]
+                             (transact! [:text/delete!])
+                             (update-state! dissoc :value))
+                no-save?   (or (empty? value) (= text value))
+                no-delete? (empty? text)]
             [:card
              [:text-field {:floating-label-text "Compose"
-                           :hint-text           (apply str (repeat 50 "Passersby were amazed at the unusually large amounts of blood. "))
-                           :value               value
+                           :hint-text           (apply str (repeat 10 "Passersby were amazed at the unusually large amounts of blood. "))
+                           :value               display
                            :full-width          true
                            :multi-line          true
                            :on-change           (fn [e] (update-state! assoc :value (.-value (.-target e))))}]
-             [:icon-button {:on-click identity :disabled (empty? value)} [:content-save]]
-             [:icon-button {:on-click identity :disabled (empty? value)} [:action-delete]]])))
+             [:icon-button {:on-click save!   :disabled no-save?}   [:content-save]]
+             [:icon-button {:on-click delete! :disabled no-delete?} [:action-delete]]])))
 
 (defcomponent Root
   (query [[:tab/current]

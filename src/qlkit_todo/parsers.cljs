@@ -45,6 +45,10 @@
   [query-term env {:keys [counter/counter] :as state}]
   counter)
 
+(defmethod read :text/text
+  [query-term env {:keys [text/text] :as state}]
+  text)
+
 (defmulti mutate (fn [qterm & _] (first qterm)))
 
 (defmethod mutate :todo/new!
@@ -70,6 +74,10 @@
   [query-term state]
   query-term)
 
+(defmethod remote :tab/text
+  [query-term state]
+  query-term)
+
 (defmethod remote :todo/new!
   [query-term state]
   query-term)
@@ -90,6 +98,10 @@
   [query-term state]
   query-term)
 
+(defmethod remote :text/text
+  [query-term state]
+  query-term)
+
 (defmethod remote :counter/inc!
   [query-term state]
   query-term)
@@ -98,9 +110,17 @@
   [query-term state]
   query-term)
 
+(defmethod remote :text/save!
+  [query-term state]
+  query-term)
+
+(defmethod remote :text/delete!
+  [query-term state]
+  query-term)
+
 (defmethod remote :qlkit-todo/todos
   [query-term state]
-  (parse-children-remote query-term)) 
+  (parse-children-remote query-term))
 
 (defmulti sync (fn [qterm & _] (first qterm)))
 
@@ -117,6 +137,10 @@
   [query-term result env state-atom]
   (parse-children-sync query-term result env))
 
+(defmethod sync :tab/text
+  [query-term result env state-atom]
+  (parse-children-sync query-term result env))
+
 (defmethod sync :todo/text
   [query-term result {:keys [:db/id] :as env} state-atom]
   (when id
@@ -130,6 +154,10 @@
 (defmethod sync :counter/counter
   [query-term result env state-atom]
   (swap! state-atom assoc :counter/counter result))
+
+(defmethod sync :text/text
+  [query-term result env state-atom]
+  (swap! state-atom assoc :text/text result))
 
 (defmethod sync :todo/new!
   [query-term result env state-atom]

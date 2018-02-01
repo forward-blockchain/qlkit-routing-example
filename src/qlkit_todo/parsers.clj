@@ -10,6 +10,8 @@
 
 (def counter (atom 0))
 
+(def text (atom "fimxe"))
+
 (defmulti read (fn [qterm & _] (first qterm)))
 
 (defmethod read :tab/todo
@@ -17,6 +19,10 @@
   (parse-children query-term env))
 
 (defmethod read :tab/counter
+  [query-term env _]
+  (parse-children query-term env))
+
+(defmethod read :tab/text
   [query-term env _]
   (parse-children query-term env))
 
@@ -40,6 +46,10 @@
 (defmethod read :counter/counter
   [query-term env _]
   @counter)
+
+(defmethod read :text/text
+  [query-term env _]
+  @text)
 
 (defmulti mutate (fn [qterm & _] (first qterm)))
 
@@ -65,3 +75,15 @@
 (defmethod mutate :counter/dec!
   [query-term env _]
   (swap! counter dec))
+
+(defmethod mutate :text/save!
+  [query-term env _]
+  (reset! text "doh! didn't save"))
+
+(defmethod mutate :text/save!
+  [[dispatch-key params :as query-term] env _]
+  (reset! text (:text/text params)))
+
+(defmethod mutate :text/delete!
+  [query-term env _]
+  (reset! text ""))
