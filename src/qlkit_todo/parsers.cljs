@@ -66,17 +66,22 @@
 
 (defmulti remote (fn [qterm & _] (first qterm)))
 
+(defn remote?
+  [[dispatch-key params :as query-term] {:keys [tab/current] :as state}]
+  (when (= dispatch-key current)
+    query-term))
+
 (defmethod remote :tab/todo
-  [query-term state]
-  query-term)
+  [& args]
+  (apply remote? args))
 
 (defmethod remote :tab/counter
-  [query-term state]
-  query-term)
+  [& args]
+  (apply remote? args))
 
 (defmethod remote :tab/text
-  [query-term state]
-  query-term)
+  [& args]
+  (apply remote? args))
 
 (defmethod remote :todo/new!
   [query-term state]
