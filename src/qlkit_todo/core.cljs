@@ -46,9 +46,17 @@
 
 (defcomponent Text
   (query [])
-  (render [atts state]
-          [:div {:max-width 300}
-           [:p "Text"]]))
+  (render [{:keys [:qlkit-text/text] :as atts} {:keys [value] :as state}]
+          (let [value   (or value "")]
+            [:div
+             [:text-field {:floating-label-text "Compose"
+                           :hint-text           (apply str (repeat 50 "Passersby were amazed at the unusually large amounts of blood. "))
+                           :value               value
+                           :full-width          true
+                           :multi-line          true
+                           :on-change           (fn [e] (update-state! assoc :value (.-value (.-target e))))}]
+             [:icon-button {:on-click identity :disabled (empty? value)} [:content-save]]
+             [:icon-button {:on-click identity :disabled (empty? value)} [:action-delete]]])))
 
 (defcomponent Root
   (query [[:tab/current]
