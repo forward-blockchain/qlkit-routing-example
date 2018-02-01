@@ -10,7 +10,7 @@
 
 (def counter (atom 0))
 
-(def text (atom "fimxe"))
+(def text (atom ""))
 
 (defmulti read (fn [qterm & _] (first qterm)))
 
@@ -75,10 +75,6 @@
 (defmethod mutate :counter/dec!
   [query-term env _]
   (swap! counter dec))
-
-(defmethod mutate :text/save!
-  [query-term env _]
-  (reset! text "doh! didn't save"))
 
 (defmethod mutate :text/save!
   [[dispatch-key params :as query-term] env _]
