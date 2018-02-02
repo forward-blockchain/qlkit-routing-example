@@ -23,6 +23,8 @@ Tabs that are not selected don't have a child component.
 
 When a tab is selected, the parser asks the server for the child component's data then the selected tab is rendered.
 
+_Note that changing tabs changes the URL hash to match the tab, and refreshing the URL with a hash correctly navigates to the appropriate tab_
+
 ### Parsing
 
 > Thunder is good, thunder is impressive; but it is lightning that does the work.

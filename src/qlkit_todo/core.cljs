@@ -65,7 +65,7 @@
             [:card {:margin "1rem"
                     :padding "1rem"}
              [:text-field {:floating-label-text "Compose"
-                           :hint-text           (apply str (repeat 10 "Passersby were amazed at the unusually large amounts of blood. "))
+                           :hint-text           (apply str (repeat 10 "All work and no play makes jack a dull boy. "))
                            :value               display
                            :full-width          true
                            :multi-line          true
