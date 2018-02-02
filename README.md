@@ -17,7 +17,7 @@ The sample app has tabs named *Todo*, *Counter*, and *Text*.
 * Counter - just a number with increment and decrement buttons
 * Text - a text area that can be saved or deleted on the server
 
-The selected tab has a React component with the same name as a child.
+The selected tab contains a child React component with the same name.
 
 Tabs that are not selected don't have a child component.
 
