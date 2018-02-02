@@ -9,6 +9,7 @@
 (defmulti mutate dispatch)
 
 (defn remote?
+  "Ensure that invisible tabs don't query the server."
   [[dispatch-key params :as query-term] {:keys [tab/current] :as state}]
   (when (or (not current)
             (= dispatch-key current))
@@ -109,9 +110,6 @@
              (-> by-id
                  (dissoc temp-id)
                  (assoc permanent-id (assoc (by-id temp-id) :db/id permanent-id)))))))
-;; ------------------------------ TodoList component ------------------------------
-
-
 
 ;; ------------------------------ Text component ----------------------------------
 (defmethod read :tab/text
@@ -145,8 +143,6 @@
 (defmethod remote :text/delete!
   [query-term state]
   query-term)
-;; ------------------------------ Text component ----------------------------------
-
 
 ;; ------------------------------ Counter component -------------------------------
 (defmethod read :tab/counter
@@ -180,4 +176,3 @@
 (defmethod remote :counter/dec!
   [query-term state]
   query-term)
-;; ------------------------------ Counter component -------------------------------
