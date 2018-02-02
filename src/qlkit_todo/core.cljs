@@ -92,7 +92,10 @@
                    :tab/counter
                    :tab/text] :as atts}
            state]
-          (let [tab!  (fn [tab] (fn [] (transact! [:tab/current! {:tab/current tab}])))]
+          (let [tab!  (fn [tab]
+                        (fn []
+                          (transact! [:tab/current! {:tab/current tab}])
+                          (set! js/window.location.hash (str "#" (name tab)))))]
             [:div
              [:tabs {:value current}
               [:tab {:value :tab/todo    :label "Todo"    :on-active (tab! :tab/todo)}    (when todo    [TodoList todo])]
