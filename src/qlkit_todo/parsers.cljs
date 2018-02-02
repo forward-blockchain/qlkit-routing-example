@@ -10,7 +10,8 @@
 
 (defn remote?
   [[dispatch-key params :as query-term] {:keys [tab/current] :as state}]
-  (when (= dispatch-key current)
+  (when (or (not current)
+            (= dispatch-key current))
     query-term))
 
 (defmethod read :tab/current

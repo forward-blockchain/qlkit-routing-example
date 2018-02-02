@@ -72,12 +72,23 @@
              [:icon-button {:on-click save!   :disabled no-save?}   [:content-save]]
              [:icon-button {:on-click delete! :disabled no-delete?} [:action-delete]]])))
 
+(defn on-hash-change [& _]
+  (let [[_ _ uri-hash] (re-matches #"^([^#]+)#([^?]*).*$" js/window.location.href)
+        current   (or ({"todo"    :tab/todo
+                        "counter" :tab/counter
+                        "text"    :tab/text}
+                       uri-hash)
+                      :tab/todo)]
+    (transact! [:tab/current! {:tab/current current}])))
+
 (defcomponent Root
   (query [[:tab/current]
           [:tab/todo    (ql/get-query TodoList)]
           [:tab/counter (ql/get-query Counter)]
           [:tab/text    (ql/get-query Text)]])
-  (component-did-mount [] (transact! [:tab/current! {:tab/current :tab/todo}]))
+  (component-did-mount []
+                       (set! js/window.onhashchange on-hash-change)
+                       (on-hash-change))
   (render [{:keys [:tab/current
                    :tab/todo
                    :tab/counter
@@ -85,10 +96,10 @@
            state]
           (let [tab!  (fn [tab] (fn [] (transact! [:tab/current! {:tab/current tab}])))]
             [:div
-             [:tabs
-              [:tab {:label "Todo"    :on-active (tab! :tab/todo)}    (when todo    [TodoList todo])]
-              [:tab {:label "Counter" :on-active (tab! :tab/counter)} (when counter [Counter counter])]
-              [:tab {:label "Text"    :on-active (tab! :tab/text)}    (when text    [Text text])]]])))
+             [:tabs {:value current}
+              [:tab {:value :tab/todo    :label "Todo"    :on-active (tab! :tab/todo)}    (when todo    [TodoList todo])]
+              [:tab {:value :tab/counter :label "Counter" :on-active (tab! :tab/counter)} (when counter [Counter counter])]
+              [:tab {:value :tab/text    :label "Text"    :on-active (tab! :tab/text)}    (when text    [Text text])]]])))
 
 (defn remote-handler [query callback]
   (go (let [{:keys [status body] :as result} (<! (post "endpoint" {:edn-params query}))]
