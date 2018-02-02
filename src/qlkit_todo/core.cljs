@@ -22,7 +22,8 @@
 (defcomponent TodoList
   (query [[:qlkit-todo/todos (ql/get-query TodoItem)]])
   (render [{:keys [:qlkit-todo/todos] :as atts} {:keys [new-todo] :as state}]
-          [:div {:max-width 300}
+          [:div {:max-width 300
+                 :margin    "1rem"}
            [:input {:id          :new-todo
                     :value       (or new-todo "")
                     :placeholder "What needs to be done?"
@@ -41,7 +42,8 @@
   (render [{:keys [:counter/counter] :as atts} state]
           (let [inc! (fn [e] (transact! [:counter/inc!]))
                 dec! (fn [e] (transact! [:counter/dec!]))]
-            [:card
+            [:card {:margin "1rem"
+                    :padding "1rem"}
              [:chip (str "Number: " counter)]
              [:icon-button {:on-click inc!} [:navigation-arrow-drop-up]]
              [:icon-button {:on-click dec!} [:navigation-arrow-drop-down]]])))
@@ -60,7 +62,8 @@
                              (update-state! dissoc :value))
                 no-save?   (or (empty? value) (= text value))
                 no-delete? (empty? text)]
-            [:card
+            [:card {:margin "1rem"
+                    :padding "1rem"}
              [:text-field {:floating-label-text "Compose"
                            :hint-text           (apply str (repeat 10 "Passersby were amazed at the unusually large amounts of blood. "))
                            :value               display
