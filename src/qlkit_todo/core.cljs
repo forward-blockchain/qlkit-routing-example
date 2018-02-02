@@ -11,8 +11,6 @@
 (enable-console-print!)
 (enable-material-ui!)
 
-(defonce app-state (atom {}))
-
 (defcomponent TodoItem
   (query [[:todo/text] [:db/id]])
   (render [{:keys [:todo/text] :as atts} state]
@@ -109,7 +107,7 @@
 
 (ql/mount {:component      Root
            :dom-element    (getElement "app")
-           :state          app-state
+           :state          (atom {})
            :remote-handler remote-handler
            :parsers        {:read   read
                             :mutate mutate
