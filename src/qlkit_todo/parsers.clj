@@ -1,5 +1,6 @@
 (ns qlkit-todo.parsers
-  (:refer-clojure :rename {read core-read})
+  (:refer-clojure :rename {read core-read
+                           sync core-sync})
   (:require [qlkit.core :refer [parse-children]]))
 
 (defn dispatch [query-term & _] (first query-term))
