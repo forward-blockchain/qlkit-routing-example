@@ -14,10 +14,11 @@
 (defcomponent TodoItem
   (query [[:todo/text] [:db/id]])
   (render [{:keys [:todo/text] :as atts} state]
-          [:li {:primary-text text
-                :right-icon [:span {:on-click (fn []
-                                                (transact! [:todo/delete!]))}
-                             [:navigation-cancel]]}]))
+          [:list-item
+           [:list-item-avatar [:avatar [:icon.check {:color "green"}]]]
+           [:list-item-text {:primary text}]
+           [:list-item-secondary-action {:on-click #(transact! [:todo/delete!])}
+            [:icon-button [:icon.cancel {:color "black"}]]]]))
 
 (defcomponent TodoList
   (query [[:qlkit-todo/todos (ql/get-query TodoItem)]])
@@ -25,6 +26,8 @@
           [:div {:max-width 300
                  :margin    "1rem"}
            [:input {:id          :new-todo
+                    :auto-focus  true
+                    :full-width  true
                     :value       (or new-todo "")
                     :placeholder "What needs to be done?"
                     :on-key-down (fn [e]
@@ -35,11 +38,14 @@
                     :on-change   (fn [e]
                                    (update-state! assoc :new-todo (.-value (.-target e))))}]
            (when (seq todos)
-             [:card [:ol (for [todo todos]
-                           [TodoItem todo])]])]))
+                          [:card [:list (for [todo (sort-by :todo/text todos)]
+                             [TodoItem todo])]])]))
+
 (defcomponent Counter
   (query [[:counter/counter]])
   (render [{:keys [:counter/counter] :as atts} state]
+          "Counter needs work"
+          #_
           (let [inc! (fn [e] (transact! [:counter/inc!]))
                 dec! (fn [e] (transact! [:counter/dec!]))]
             [:card {:margin "1rem"
@@ -51,6 +57,8 @@
 (defcomponent Text
   (query [[:text/text]])
   (render [{:keys [:text/text] :as atts} {:keys [value] :as state}]
+          "Text needs work"
+          #_
           (let [display    (cond (not (empty? value)) value
                                  (not (empty? text))  text
                                  :else                "")
@@ -99,6 +107,8 @@
                         (fn []
                           (transact! [:tab/current! {:tab/current tab}])
                           (set! js/window.location.hash (str "#" (name tab)))))]
+            "Todo needs work"
+            #_
             [:div
              [:tabs {:value current}
               [:tab {:value :tab/todo    :label "Todo"    :on-active (tab! :tab/todo)}    (when todo    [TodoList todo])]
