@@ -45,21 +45,16 @@
 (defcomponent Counter
   (query [[:counter/counter]])
   (render [{:keys [:counter/counter] :as atts} state]
-          "Counter needs work"
-          #_
-          (let [inc! (fn [e] (transact! [:counter/inc!]))
-                dec! (fn [e] (transact! [:counter/dec!]))]
-            [:card {:margin "1rem"
-                    :padding "1rem"}
-             [:chip (str "Number: " counter)]
-             [:icon-button {:on-click inc!} [:navigation-arrow-drop-up]]
-             [:icon-button {:on-click dec!} [:navigation-arrow-drop-down]]])))
+          [:card
+           [:card-content
+            [:typography {:variant :headline} counter]]
+           [:card-actions
+             [:button {:size :small :variant :raised :on-click #(transact! [:counter/inc!])} "larger"  [:icon.arrow-upward]]
+             [:button {:size :small :variant :raised :on-click #(transact! [:counter/dec!])} "smaller" [:icon.arrow-downward]]]]))
 
 (defcomponent Text
   (query [[:text/text]])
   (render [{:keys [:text/text] :as atts} {:keys [value] :as state}]
-          "Text needs work"
-          #_
           (let [display    (cond (not (empty? value)) value
                                  (not (empty? text))  text
                                  :else                "")
@@ -73,15 +68,14 @@
                 no-delete? (empty? text)]
             [:card {:margin "1rem"
                     :padding "1rem"}
-             [:text-field {:floating-label-text "Compose"
-                           :hint-text           (apply str (repeat 10 "All work and no play makes jack a dull boy. "))
-                           :value               display
-                           :full-width          true
-                           :multi-line          true
-                           :on-change           (fn [e] (update-state! assoc :value (.-value (.-target e))))}]
-             [:icon-button {:on-click save!   :disabled no-save?}   [:content-save]]
-             [:icon-button {:on-click delete! :disabled no-delete?} [:action-delete]]])))
-
+             [:text-field {:value       display
+                           :placeholder (apply str (repeat 10 "All work and no play makes jack a dull boy. "))
+                           :full-width  true
+                           :multiline   true
+                           :on-change   (fn [e] (js/console.log "display" display ) (update-state! assoc :value (.-value (.-target e))))}]
+             [:card-actions
+              [:button {:size :small :variant :raised :on-click save!   :disabled no-save?}   "save"   [:icon.save]]
+              [:button {:size :small :variant :raised :on-click delete! :disabled no-delete?} "delete" [:icon.delete]]]])))
 
 (def tabs {0         "#todo"
            1         "#counter"
@@ -95,8 +89,9 @@
   (set! js/window.location.hash (tabs tab-index)))
   
 (defn on-hash-change! [& _]
-  (let [[_ _ uri-hash] (re-matches #"^([^#]+)#([^?]*).*$" js/window.location.href)]
-    (transact! [:tab/current! {:tab/current (tabs (lower-case uri-hash) 0)}])))
+  (let [[_ _ uri-hash] (re-matches #"^([^#]+)#([^?]*).*$" js/window.location.href)
+        uri-hash (if uri-hash (lower-case uri-hash) "todo")]
+    (transact! [:tab/current! {:tab/current (tabs uri-hash)}])))
 
 (defcomponent Root
   (query [[:tab/current]
@@ -111,17 +106,16 @@
                    :tab/counter
                    :tab/text] :as atts}
            state]
-          [:app-bar
-             [:tabs {:value current :on-change on-tab-change!}
-              [:tab {:label "todo"}]
-              [:tab {:label "counter"}]
-              [:tab {:label "text"}]]]
-          #_
           [:div
-           [:tabs {:value tab-idx}
-            [:tab {:value :tab/todo    :label "Todo"    :on-active (tab! :tab/todo)}    (when todo    [TodoList todo])]
-            [:tab {:value :tab/counter :label "Counter" :on-active (tab! :tab/counter)} (when counter [Counter counter])]
-            [:tab {:value :tab/text    :label "Text"    :on-active (tab! :tab/text)}    (when text    [Text text])]]]))
+           [:app-bar {:position "static"}
+            [:tabs {:value current :on-change on-tab-change!}
+             [:tab {:label "todo"}]
+             [:tab {:label "counter"}]
+             [:tab {:label "text"}]]]
+           (case current
+             0 [TodoList todo]
+             1 [Counter counter]
+             2 [Text text])]))
 
 (defn remote-handler [query callback]
   (go (let [{:keys [status body] :as result} (<! (post "endpoint" {:edn-params query}))]

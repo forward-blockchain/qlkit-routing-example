@@ -128,6 +128,15 @@
   [query-term env {:keys [text/text] :as state}]
   text)
 
+(defmethod mutate :text/save!
+  [[dispatch-key params :as query-term] env state-atom]
+  (let [{:keys [:text/text]} params]
+    (swap! state-atom assoc :text/text text)))
+
+(defmethod mutate :text/delete!
+  [query-term env state-atom]
+  (swap! state-atom dissoc :text/text))
+
 (defmethod remote :text/text
   [query-term state]
   query-term)
@@ -164,6 +173,14 @@
 (defmethod remote :counter/counter
   [query-term state]
   query-term)
+
+(defmethod mutate :counter/inc!
+  [query-term env state-atom]
+  (swap! state-atom update :counter/counter inc))
+
+(defmethod mutate :counter/dec!
+  [query-term env state-atom]
+  (swap! state-atom update :counter/counter dec))
 
 (defmethod sync :counter/counter
   [query-term result env state-atom]
