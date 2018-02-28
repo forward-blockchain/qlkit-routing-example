@@ -6,6 +6,7 @@
             [qlkit-todo.parsers :refer [read mutate remote sync]]
             [qlkit-material-ui.core :refer [enable-material-ui!]]
             [cljs-http.client :as http :refer [post]]
+            [clojure.string :refer [lower-case]]
             [cljs.reader :refer [read-string]]))
 
 (enable-console-print!)
@@ -81,14 +82,21 @@
              [:icon-button {:on-click save!   :disabled no-save?}   [:content-save]]
              [:icon-button {:on-click delete! :disabled no-delete?} [:action-delete]]])))
 
-(defn on-hash-change [& _]
-  (let [[_ _ uri-hash] (re-matches #"^([^#]+)#([^?]*).*$" js/window.location.href)
-        current   (or ({"todo"    :tab/todo
-                        "counter" :tab/counter
-                        "text"    :tab/text}
-                       uri-hash)
-                      :tab/todo)]
-    (transact! [:tab/current! {:tab/current current}])))
+
+(def tabs {0         "#todo"
+           1         "#counter"
+           2         "#text"
+           "todo"    0
+           "counter" 1
+           "text"    2})
+
+(defn on-tab-change! [_ tab-index]
+  (transact! [:tab/current! {:tab/current tab-index}])
+  (set! js/window.location.hash (tabs tab-index)))
+  
+(defn on-hash-change! [& _]
+  (let [[_ _ uri-hash] (re-matches #"^([^#]+)#([^?]*).*$" js/window.location.href)]
+    (transact! [:tab/current! {:tab/current (tabs (lower-case uri-hash) 0)}])))
 
 (defcomponent Root
   (query [[:tab/current]
@@ -96,24 +104,24 @@
           [:tab/counter (ql/get-query Counter)]
           [:tab/text    (ql/get-query Text)]])
   (component-did-mount []
-                       (set! js/window.onhashchange on-hash-change)
-                       (on-hash-change))
+                       (set! js/window.onhashchange on-hash-change!)
+                       (on-hash-change!))
   (render [{:keys [:tab/current
                    :tab/todo
                    :tab/counter
                    :tab/text] :as atts}
            state]
-          (let [tab!  (fn [tab]
-                        (fn []
-                          (transact! [:tab/current! {:tab/current tab}])
-                          (set! js/window.location.hash (str "#" (name tab)))))]
-            "Todo needs work"
-            #_
-            [:div
-             [:tabs {:value current}
-              [:tab {:value :tab/todo    :label "Todo"    :on-active (tab! :tab/todo)}    (when todo    [TodoList todo])]
-              [:tab {:value :tab/counter :label "Counter" :on-active (tab! :tab/counter)} (when counter [Counter counter])]
-              [:tab {:value :tab/text    :label "Text"    :on-active (tab! :tab/text)}    (when text    [Text text])]]])))
+          [:app-bar
+             [:tabs {:value current :on-change on-tab-change!}
+              [:tab {:label "todo"}]
+              [:tab {:label "counter"}]
+              [:tab {:label "text"}]]]
+          #_
+          [:div
+           [:tabs {:value tab-idx}
+            [:tab {:value :tab/todo    :label "Todo"    :on-active (tab! :tab/todo)}    (when todo    [TodoList todo])]
+            [:tab {:value :tab/counter :label "Counter" :on-active (tab! :tab/counter)} (when counter [Counter counter])]
+            [:tab {:value :tab/text    :label "Text"    :on-active (tab! :tab/text)}    (when text    [Text text])]]]))
 
 (defn remote-handler [query callback]
   (go (let [{:keys [status body] :as result} (<! (post "endpoint" {:edn-params query}))]

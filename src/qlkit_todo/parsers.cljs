@@ -17,7 +17,7 @@
 
 (defmethod read :tab/current
   [_ _ {:keys [:tab/current] :as state}]
-  current)
+  (or current 0))
 
 (defmethod mutate :tab/current!
   [[_ params :as query-term] env state-atom]
