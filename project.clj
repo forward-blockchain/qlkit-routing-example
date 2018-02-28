@@ -1,4 +1,4 @@
-(defproject qlkit-todo "0.1.0-SNAPSHOT"
+(defproject qlkit-todo "0.3.0-SNAPSHOT"
   :description "FIXME: write this!"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -6,14 +6,12 @@
   
   :min-lein-version "2.7.1"
 
-  :dependencies [[org.clojure/clojure "1.9.0-beta4"]
+  :dependencies [[cljs-http/cljs-http "0.1.44"]
+                 [com.cognitect/transit-cljs "0.8.243"]
+                 [org.clojure/clojure "1.9.0-beta4"]
                  [org.clojure/clojurescript "1.9.946"]
                  [org.clojure/core.async  "0.3.443"]
-                 [qlkit "0.2.0-SNAPSHOT"]
-                 [qlkit-renderer "0.2.0-SNAPSHOT"]
-                 [qlkit-material-ui "0.3.0-SNAPSHOT"]
-                 [com.cognitect/transit-cljs "0.8.243"]
-                 [cljs-http/cljs-http "0.1.44"]]
+                 [qlkit-material-ui "0.3.0-SNAPSHOT"]]
 
   :plugins [[lein-figwheel "0.5.14"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]]
