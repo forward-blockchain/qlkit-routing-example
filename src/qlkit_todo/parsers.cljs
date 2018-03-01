@@ -8,14 +8,15 @@
 (defmulti sync   dispatch)
 (defmulti mutate dispatch)
 
-(def tabs {:todo    0, 0 :todo,   :tab/todo    0
-           :counter 1, 1 :counter :tab/counter 1
-           :text    2, 2 :text    :tab/text    2})
+(def tabs {:todo    0, 0 :todo
+           :counter 1, 1 :counter
+           :text    2, 2 :text})
 
 (defn remote?
-  "Ensure that invisible tabs don't query the server."
-  [[dispatch-key _ :as query-term] {:keys [tab/current] :as state}]
-  (when (= current (tabs dispatch-key))
+  "Ensure that only the currently selected tab queries the server."
+  [[dispatch-key params :as query-term] {:keys [tab/current] :as state}]
+  (when (= (-> dispatch-key name keyword tabs)
+           current)
     query-term))
 
 (defmethod read :tab/current
