@@ -16,10 +16,10 @@
   (query [[:todo/text] [:db/id]])
   (render [{:keys [:todo/text] :as atts} state]
           [:list-item
-           [:list-item-avatar [:avatar [:icon.check {:color "green"}]]]
+           [:list-item-avatar [:avatar [:icon/check {:color "green"}]]]
            [:list-item-text {:primary text}]
            [:list-item-secondary-action {:on-click #(transact! [:todo/delete!])}
-            [:icon-button [:icon.cancel {:color "black"}]]]]))
+            [:icon-button [:icon/cancel {:color "black"}]]]]))
 
 (defcomponent TodoList
   (query [[:qlkit-todo/todos (ql/get-query TodoItem)]])
@@ -49,8 +49,8 @@
            [:card-content
             [:typography {:variant :headline} counter]]
            [:card-actions
-             [:button {:size :small :variant :raised :on-click #(transact! [:counter/inc!])} "larger"  [:icon.arrow-upward]]
-             [:button {:size :small :variant :raised :on-click #(transact! [:counter/dec!])} "smaller" [:icon.arrow-downward]]]]))
+             [:button {:size :small :variant :raised :on-click #(transact! [:counter/inc!])} "larger"  [:icon/arrow-upward]]
+             [:button {:size :small :variant :raised :on-click #(transact! [:counter/dec!])} "smaller" [:icon/arrow-downward]]]]))
 
 (defcomponent Text
   (query [[:text/text]])
@@ -74,8 +74,8 @@
                            :multiline   true
                            :on-change   (fn [e] (update-state! assoc :value (.-value (.-target e))))}]
              [:card-actions
-              [:button {:size :small :variant :raised :on-click save!   :disabled no-save?}   "save"   [:icon.save]]
-              [:button {:size :small :variant :raised :on-click delete! :disabled no-delete?} "delete" [:icon.delete]]]])))
+              [:button {:size :small :variant :raised :on-click save!   :disabled no-save?}   "save"   [:icon/save]]
+              [:button {:size :small :variant :raised :on-click delete! :disabled no-delete?} "delete" [:icon/delete]]]])))
 
 (defn on-tab-change! [_ idx]
   (transact! [:tab/current! {:tab/current idx}])
