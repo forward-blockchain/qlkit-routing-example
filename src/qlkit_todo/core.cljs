@@ -1,13 +1,13 @@
 (ns qlkit-todo.core
   (:require-macros [cljs.core.async.macros :refer [go]])
-  (:require [qlkit.core :as ql]
-            [qlkit-renderer.core :refer [transact! update-state!] :refer-macros [defcomponent]]
-            [goog.dom :refer [getElement]]
-            [qlkit-todo.parsers :refer [read mutate remote sync]]
-            [qlkit-material-ui.core :refer [enable-material-ui!]]
-            [cljs-http.client :as http :refer [post]]
+  (:require [cljs-http.client :as http :refer [post]]
+            [cljs.reader :refer [read-string]]
             [clojure.string :refer [lower-case]]
-            [cljs.reader :refer [read-string]]))
+            [goog.dom :refer [getElement]]
+            [qlkit-material-ui.core :refer [enable-material-ui!]]
+            [qlkit-renderer.core :refer [transact! update-state!] :refer-macros [defcomponent]]
+            [qlkit-todo.parsers :refer [read mutate remote sync tabs]]
+            [qlkit.core :as ql]))
 
 (enable-console-print!)
 (enable-material-ui!)
@@ -72,35 +72,29 @@
                            :placeholder (apply str (repeat 10 "All work and no play makes jack a dull boy. "))
                            :full-width  true
                            :multiline   true
-                           :on-change   (fn [e] (js/console.log "display" display ) (update-state! assoc :value (.-value (.-target e))))}]
+                           :on-change   (fn [e] (update-state! assoc :value (.-value (.-target e))))}]
              [:card-actions
               [:button {:size :small :variant :raised :on-click save!   :disabled no-save?}   "save"   [:icon.save]]
               [:button {:size :small :variant :raised :on-click delete! :disabled no-delete?} "delete" [:icon.delete]]]])))
 
-(def tabs {0         "#todo"
-           1         "#counter"
-           2         "#text"
-           "todo"    0
-           "counter" 1
-           "text"    2})
 
-(defn on-tab-change! [_ tab-index]
-  (transact! [:tab/current! {:tab/current tab-index}])
-  (set! js/window.location.hash (tabs tab-index)))
+
+(defn on-tab-change! [_ idx]
+  (transact! [:tab/current! {:tab/current idx}])
+  (set! js/window.location.hash (str "#" (name (tabs idx)))))
   
 (defn on-hash-change! [& _]
   (let [[_ _ uri-hash] (re-matches #"^([^#]+)#([^?]*).*$" js/window.location.href)
-        uri-hash (if uri-hash (lower-case uri-hash) "todo")]
-    (transact! [:tab/current! {:tab/current (tabs uri-hash)}])))
+        uri-hash       (if uri-hash (lower-case uri-hash) "todo")
+        idx            (or (tabs (keyword uri-hash)) 0)]
+    (transact! [:tab/current! {:tab/current idx}])))
 
 (defcomponent Root
   (query [[:tab/current]
           [:tab/todo    (ql/get-query TodoList)]
           [:tab/counter (ql/get-query Counter)]
           [:tab/text    (ql/get-query Text)]])
-  (component-did-mount []
-                       (set! js/window.onhashchange on-hash-change!)
-                       (on-hash-change!))
+  (component-did-mount [] (set! js/window.onhashchange on-hash-change!))
   (render [{:keys [:tab/current
                    :tab/todo
                    :tab/counter
@@ -125,7 +119,7 @@
 
 (ql/mount {:component      Root
            :dom-element    (getElement "app")
-           :state          (atom {})
+           :state          (atom {:tab/current 0})
            :remote-handler remote-handler
            :parsers        {:read   read
                             :mutate mutate

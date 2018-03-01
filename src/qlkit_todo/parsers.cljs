@@ -8,16 +8,20 @@
 (defmulti sync   dispatch)
 (defmulti mutate dispatch)
 
+(def tabs {:todo    0, 0 :todo,   :tab/todo    0
+           :counter 1, 1 :counter :tab/counter 1
+           :text    2, 2 :text    :tab/text    2})
+
 (defn remote?
   "Ensure that invisible tabs don't query the server."
-  [[dispatch-key params :as query-term] {:keys [tab/current] :as state}]
-  (when (or (not current)
-            (= dispatch-key current))
+  [[dispatch-key _ :as query-term] {:keys [tab/current] :as state}]
+  (when (= current (tabs dispatch-key))
     query-term))
 
 (defmethod read :tab/current
   [_ _ {:keys [:tab/current] :as state}]
-  (or current 0))
+  (assert (#{0 1 2} current))
+  current)
 
 (defmethod mutate :tab/current!
   [[_ params :as query-term] env state-atom]
@@ -95,10 +99,7 @@
 
 (defmethod sync :todo/text
   [query-term result {:keys [:db/id] :as env} state-atom]
-  (when id
-    (swap! state-atom assoc-in [:todo/by-id id :todo/text] result)))
-
-
+  (swap! state-atom assoc-in [:todo/by-id id :todo/text] result))
 
 (defmethod sync :todo/new!
   [query-term result env state-atom]
@@ -164,7 +165,8 @@
 
 (defmethod sync :tab/counter
   [query-term result env state-atom]
-  (parse-children-sync query-term result env))
+  (when result
+    (parse-children-sync query-term result env)))
 
 (defmethod read :counter/counter
   [query-term env {:keys [counter/counter] :as state}]
