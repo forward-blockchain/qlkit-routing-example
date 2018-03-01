@@ -89,7 +89,6 @@
   [query-term state]
   query-term)
 
-
 (defmethod read :todo/text
   [query-term {:keys [todo-id] :as env} state]
   (get-in state [:todo/by-id todo-id :todo/text]))
@@ -100,7 +99,8 @@
 
 (defmethod sync :todo/text
   [query-term result {:keys [:db/id] :as env} state-atom]
-  (swap! state-atom assoc-in [:todo/by-id id :todo/text] result))
+  (when id
+    (swap! state-atom assoc-in [:todo/by-id id :todo/text] result)))
 
 (defmethod sync :todo/new!
   [query-term result env state-atom]
