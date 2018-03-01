@@ -39,7 +39,7 @@
                     :on-change   (fn [e]
                                    (update-state! assoc :new-todo (.-value (.-target e))))}]
            (when (seq todos)
-                          [:card [:list (for [todo (sort-by :todo/text todos)]
+             [:card [:list (for [todo (sort-by :todo/text todos)]
                              [TodoItem todo])]])]))
 
 (defcomponent Counter
@@ -77,16 +77,17 @@
               [:button {:size :small :variant :raised :on-click save!   :disabled no-save?}   "save"   [:icon.save]]
               [:button {:size :small :variant :raised :on-click delete! :disabled no-delete?} "delete" [:icon.delete]]]])))
 
-
-
 (defn on-tab-change! [_ idx]
   (transact! [:tab/current! {:tab/current idx}])
   (set! js/window.location.hash (str "#" (name (tabs idx)))))
   
 (defn on-hash-change! [& _]
   (let [[_ _ uri-hash] (re-matches #"^([^#]+)#([^?]*).*$" js/window.location.href)
-        uri-hash       (if uri-hash (lower-case uri-hash) "todo")
+        uri-hash       (if uri-hash
+                         (lower-case uri-hash)
+                         "todo")
         idx            (or (tabs (keyword uri-hash)) 0)]
+    (set! js/window.location.hash (str "#" uri-hash))
     (transact! [:tab/current! {:tab/current idx}])))
 
 (defcomponent Root
@@ -94,7 +95,9 @@
           [:tab/todo    (ql/get-query TodoList)]
           [:tab/counter (ql/get-query Counter)]
           [:tab/text    (ql/get-query Text)]])
-  (component-did-mount [] (set! js/window.onhashchange on-hash-change!))
+  (component-did-mount []
+                       (set! js/window.onhashchange on-hash-change!)
+                       (on-hash-change!))
   (render [{:keys [:tab/current
                    :tab/todo
                    :tab/counter
