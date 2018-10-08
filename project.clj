@@ -11,7 +11,7 @@
                  [org.clojure/clojure "1.9.0-beta4"]
                  [org.clojure/clojurescript "1.9.946"]
                  [org.clojure/core.async  "0.3.443"]
-                 [qlkit-material-ui "0.3.0-SNAPSHOT"]]
+                 [qlkit-material-ui "0.3.2-SNAPSHOT"]]
 
   :plugins [[lein-figwheel "0.5.15"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]]
